@@ -27,6 +27,7 @@ road050 <- road %>% #filtrando apenas a rodovia de interesse BR050
 plot(road050$geometry) #visualizando a nossa rodovia de interesse
 
 
+##### etapa extra para auxiliar no recorte do raster posteriormente
 road_buffer <- st_buffer(x = road050$geometry, dist = 15000) #estabelecendo um buffer ao entorno da rodovia para depois recortarmos o raster
 plot(road_buffer) #tem varios buffer se sobrepondo porq a rodovia esta dividida em varios trechos
 
