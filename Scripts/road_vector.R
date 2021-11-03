@@ -27,7 +27,7 @@ library(rgeos)
 
 
 ##### entrando com o shape da rodovia do google mymaps
-br050 <- st_read(here::here("Variaveis", "rodovias", "br050_mymaps.shp"), quiet = TRUE)
+br050 <- st_read(here::here("Variaveis", "rodovias", "br050_uber.shp"), quiet = TRUE)
 
 plot(br050$geometry) #visualizando a rodovia 050
 
