@@ -40,7 +40,7 @@ br050_union <- st_union(road050_x) #unindo todos os trechos da rodovia em uma li
 
 plot(br050_union)
 
-br050 <- st_as_sf(br050_union)
+br050 <- st_as_sf(br050_union) #Transformei o objeto multilinestring em espacial.
 
 #as_Spatial(br050) #objeto espacial SP
 
