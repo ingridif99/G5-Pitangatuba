@@ -9,6 +9,7 @@ library(here)
 library(tidyverse)
 library(readxl)
 library(sf)
+library(rgeos)
 
 ###### entrando com o shape das rodovias federais
 road <- st_read(here::here("Variaveis", "rodovias", "Rodovias.shp"), quiet = TRUE)
@@ -26,6 +27,22 @@ road050 <- road %>% #filtrando apenas a rodovia de interesse BR050
 
 plot(road050$geometry) #visualizando a nossa rodovia de interesse
 
+road050_x<- road050 %>%  #retirei o anel em Uberlandia para termos a rodovia em linha mesmo
+  filter(nm_tipo_tr == "Eixo Principal" |
+              nm_tipo_tr == "Acesso" |
+              nm_tipo_tr == "Variante")
+plot(road050_x$geometry)
+
+br050_ext <- sum(st_length(road050_x)) #extensao em metros da rodovia
+
+br050_union <- st_union(road050_x) #unindo todos os trechos da rodovia em uma linha - all geometries are unioned together
+#road050_union <- st_combine(road050_x) # Combine several feature geometries into one, without unioning or resolving internal boundaries
+
+plot(br050_union)
+
+br050 <- st_as_sf(br050_union)
+
+#as_Spatial(br050) #objeto espacial SP
 
 ##### etapa extra para auxiliar no recorte do raster posteriormente
 road_buffer <- st_buffer(x = road050$geometry, dist = 15000) #estabelecendo um buffer ao entorno da rodovia para depois recortarmos o raster
