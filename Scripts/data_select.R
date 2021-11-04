@@ -46,6 +46,11 @@ dados_esp <- dados_filter %>%
   dplyr::select(-record_ok) #aqui to excluindo essa coluna porq nao precisamos mais
 
 dados_esp #esse é o conjunto final que vamos utilizar para analisar
-  
+
+##### visualizando os pontos das fatalidades 
+dados_esp_geom <- dados_esp %>% 
+  st_as_sf(coords = c("Long", "Lat"), crs = 4326)
+
+plot(dados_esp_geom$geometry, add = TRUE) #visualizando as fatalidades na rodovia  
 
 
