@@ -16,13 +16,16 @@ br050_sp <- as_Spatial(br050_geometry) #transformando em objeto espacial SP
 source(here::here("Scripts", "SegmentSpatialLines_function.R")) #puxando função para dividir br em segmentos
 
 #segmentos de 1.5km na rodovia 
-segments_br050 <- SegmentSpatialLines(br050_sp, length = 0.0135, merge.last = TRUE) # o comprimento na função é dado em metros, nossas coords estão em graus (1grau = 111km)
+#segments_br050 <- SegmentSpatialLines(br050_sp, length = 0.0135, merge.last = TRUE) # o comprimento na função é dado em metros, nossas coords estão em graus (1grau = 111km)
+#plot(segments_br050, col= rainbow(8), lwd=3) #visualizando a estrada segmentada
+
+#segmentos de 500M na rodovia 
+segments_br050 <- SegmentSpatialLines(br050_sp, length = 0.0045, merge.last = TRUE) # o comprimento na função é dado em metros, nossas coords estão em graus (1grau = 111km)
 plot(segments_br050, col= rainbow(8), lwd=3) #visualizando a estrada segmentada
 
 #buffer de 2km em cada segmento
 seg_buffer <- gBuffer(segments_br050, width = 0.0195, byid = TRUE, capStyle = "FLAT", joinStyle = "BEVEL", mitreLimit = 0.01)
 plot(seg_buffer[4:6,], border = "orange")
-plot(seg_buffer, add = T)
 
 #transformar o arquivo SpatialLine em Linestring
 seg_sf <- st_as_sf(seg_buffer)
@@ -40,7 +43,7 @@ plot(seg_centroide)
 dados_esp_geom <- dados_esp %>% 
   st_as_sf(coords = c("Long", "Lat"), crs = 4326)
 
-plot(seg_road_utm22s[10:20,], col= rainbow(8), lwd=3) #visualizando a estrada segmentada em segmentos especificos
+plot(seg_road_utm22s[10:40,], col= rainbow(8), lwd=3) #visualizando a estrada segmentada em segmentos especificos
 plot(fatalidades_utm22s$geometry, add = TRUE) #visualizando as fatalidades na rodovia
 
 ####### contar o numero de fatalidades em cada trecho
@@ -83,12 +86,25 @@ agua_utm22s <- sf::st_transform(agua_sf, crs = 32722)
 floresta_utm22s <- sf::st_transform(floresta_sf, crs = 32722)
 
 ####### calculando a distancia do centroide de cada trecho da rodovia em relação a agua
-dist_agua <- seg_centroide %>% 
-  dplyr::mutate(dist_agua = sf::st_distance(seg_centroide, agua_utm22s))
+#dist_agua <- seg_centroide %>% 
+ # dplyr::mutate(dist_agua = sf::st_distance(seg_centroide, agua_utm22s)) 
+
+dist_agua <- sf::st_distance(seg_centroide, agua_utm22s)
+min.dist_agua <- apply(dist_agua, 1, FUN = min)
 
 ####### calculando a distancia do centroide de cada trecho da rodovia em relação a agua
-dist_flo <- seg_centroide %>% 
-  dplyr::mutate(dist_flo = sf::st_distance(seg_centroide, floresta_utm22s))
+#dist_flo <- seg_centroide %>% 
+ # dplyr::mutate(dist_flo = sf::st_distance(seg_centroide, floresta_utm22s))
+
+dist_flo <- sf::st_distance(seg_centroide, floresta_utm22s)
+min.dist_flo <- apply(dist_flo, 1, FUN = min)
+
+####### juntanto todos os dados em um df só (floresta, agua e atropelamentos)
+
+dados_glm <- as.data.frame(cbind(seg_fatal, min.dist_agua, min.dist_flo))
+ 
+
+
 
 # exportar o vetor da rodovia segmentada na extensão esri shapefile
 st_write(obj = seg_road_utm22s, dsn = here::here("Variaveis", "rodovias", "seg_road_utm22s.shp"))
