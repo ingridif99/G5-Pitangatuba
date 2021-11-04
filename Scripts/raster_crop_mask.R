@@ -19,3 +19,13 @@ road_crop_mask <- raster %>%
   mask(br050_y)
 
 plot(road_crop_mask) #visualizando
+
+
+# exportar raster layer
+raster::writeRaster(road_crop_mask, 
+                    filename = here::here("Variaveis", "vegetacao", "raster_veg_road"),
+                    format = "GTiff",
+                    datatype = "INT2S",
+                    options = c("COMPRESS=DEFLATE", "TFW=YES"),
+                    progress = "text",
+                    overwrite = TRUE)
