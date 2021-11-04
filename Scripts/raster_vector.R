@@ -90,9 +90,5 @@ dist_agua <- seg_centroide %>%
 dist_flo <- seg_centroide %>% 
   dplyr::mutate(dist_flo = sf::st_distance(seg_centroide, floresta_utm22s))
 
-
-
-
-
 # exportar o vetor da rodovia segmentada na extensão esri shapefile
 st_write(obj = seg_road_utm22s, dsn = here::here("Variaveis", "rodovias", "seg_road_utm22s.shp"))
