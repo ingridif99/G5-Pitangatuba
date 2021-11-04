@@ -26,12 +26,12 @@ dados_filter <- dados_roadkill %>%
   filter(Class == "Mammalia",#selecionando apenas mamiferos
          Road_ID == "BR_050", #selecionando apenas a rodovia BR050
          Reference_ID == "Carvalho_etal_2015") %>% #selecionando apenas uma referencia para os dados serem mais consistente 
-  select(c(4,5,7,10,13,14,21,22,23,24)) %>%  #selecionando apenas as colunas importantes e que vamos utilizar
+  dplyr::select(c(4,5,7,10,13,14,21,22,23,24)) %>%  #selecionando apenas as colunas importantes e que vamos utilizar
   drop_na(Family) #excluindo os registros sem identificação a nivel de familia
 
 ###### filtrando os dados de traits
 dados_traits_filter <- dados_traits %>% 
-  select(c(2,3,6,10,11)) %>% 
+  dplyr::select(c(2,3,6,10,11)) %>% 
   rename(Scientific_name = binomial,
          Order = order) #renomeando o nome da coluna para poder juntar na etapa seguinte por esta coluna
 
@@ -43,7 +43,7 @@ dados_esp <- dados_filter %>%
   mutate(record_ok = case_when(Family == "Didelphidae" ~ "excluir", #criei uma coluna para poder excluir as linhas de didelphidae, pois sao esp < 1kg
             TRUE ~ "ok")) %>%  #no caso aqui apenas indiquei quais linhas estao ok e quais devem ser excluidas
   filter(record_ok == "ok") %>%  #aqui ficou apenas as linhas ok, sem didelphidae
-  select(-record_ok) #aqui to excluindo essa coluna porq nao precisamos mais
+  dplyr::select(-record_ok) #aqui to excluindo essa coluna porq nao precisamos mais
 
 dados_esp #esse é o conjunto final que vamos utilizar para analisar
   
