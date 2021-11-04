@@ -52,5 +52,3 @@ dados_esp_geom <- dados_esp %>%
   st_as_sf(coords = c("Long", "Lat"), crs = 4326)
 
 plot(dados_esp_geom$geometry, add = TRUE) #visualizando as fatalidades na rodovia  
-
-
