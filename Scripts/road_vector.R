@@ -37,10 +37,10 @@ br050_geometry <- br050$geometry #selecionou apenas a coluna das coordenadas do 
 
 br050_sp <- as_Spatial(br050_geometry) #transformando em objeto espacial SP
 
-source("SegmentSpatialLines_function.R") #puxando função para dividir br em segmentos
+source(here::here("Scripts", "SegmentSpatialLines_function.R")) #puxando função para dividir br em segmentos
 
-#segmentos de 5km
-segments_br050 <- SegmentSpatialLines(br050_sp, length = 0.045) # o comprimento na função é dado em metros, nossas coords estão em graus (1grau = 111km)
+#segmentos de 500m
+segments_br050 <- SegmentSpatialLines(br050_sp, length = 0.0045, merge.last = TRUE) # o comprimento na função é dado em metros, nossas coords estão em graus (1grau = 111km)
 plot(segments_br050, col= rainbow(8), lwd=3) #visualizando a estrada segmentada
 
 ##### etapa extra para auxiliar no recorte do raster posteriormente
