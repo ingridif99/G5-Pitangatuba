@@ -47,6 +47,9 @@ dados_esp <- dados_filter %>%
 
 dados_esp #esse é o conjunto final que vamos utilizar para analisar
 
+registros_especie <- dados_esp %>% #nuemro de registros por espécie pra ter uma ideia
+  count(Scientific_name)
+
 ##### visualizando os pontos das fatalidades 
 dados_esp_geom <- dados_esp %>% 
   st_as_sf(coords = c("Long", "Lat"), crs = 4326)
