@@ -44,11 +44,11 @@ segments_br050 <- SegmentSpatialLines(br050_sp, length = 0.045) # o comprimento 
 plot(segments_br050, col= rainbow(8), lwd=3) #visualizando a estrada segmentada
 
 ##### etapa extra para auxiliar no recorte do raster posteriormente
-road_buffer <- st_buffer(x = road050$geometry, dist = 15000) #estabelecendo um buffer ao entorno da rodovia para depois recortarmos o raster
+road_buffer <- st_buffer(x = br050$geometry, dist = 15000) #estabelecendo um buffer ao entorno da rodovia para depois recortarmos o raster
 plot(road_buffer) #tem varios buffer se sobrepondo porq a rodovia esta dividida em varios trechos
 
-road_union <- st_union(road_buffer) #unindo todos os buffers de cada trecho em um só
-plot(road_union) #visualizando 
+#road_union <- st_union(road_buffer) #unindo todos os buffers de cada trecho em um só
+#plot(road_union) #visualizando 
 
 # exportar o vetor da rodovia na extensão esri shapefile
-st_write(obj = road_union, dsn = here::here("Variaveis", "rodovias", "rodovia_br050.shp"))
+st_write(obj = road_buffer, dsn = here::here("Variaveis", "rodovias", "br050_buffer.shp"))
