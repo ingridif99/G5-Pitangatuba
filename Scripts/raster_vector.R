@@ -4,8 +4,9 @@ library(tidyverse)
 library(readxl)
 library(sf)
 library(raster)
+library(rgeos)
 
-##### entrando com o shape da rodovia do google mymaps
+######## entrando com o shape da rodovia do google mymaps recortado apenas para o trecho que tem os atrop
 br050 <- st_read(here::here("Variaveis", "rodovias", "br050_uber.shp"), quiet = TRUE)
 plot(br050$geometry) #visualizando a rodovia 050
 br050_ext <- sum(st_length(br050)) #extensao em metros da rodovia
@@ -14,91 +15,84 @@ br050_sp <- as_Spatial(br050_geometry) #transformando em objeto espacial SP
 
 source(here::here("Scripts", "SegmentSpatialLines_function.R")) #puxando função para dividir br em segmentos
 
-#segmentos de 5km
-segments_br050 <- SegmentSpatialLines(br050_sp, length = 0.045) # o comprimento na função é dado em metros, nossas coords estão em graus (1grau = 111km)
+#segmentos de 1.5km na rodovia 
+segments_br050 <- SegmentSpatialLines(br050_sp, length = 0.0135, merge.last = TRUE) # o comprimento na função é dado em metros, nossas coords estão em graus (1grau = 111km)
 plot(segments_br050, col= rainbow(8), lwd=3) #visualizando a estrada segmentada
 
-##### visualizando os pontos das fatalidades 
+#buffer de 2km em cada segmento
+seg_buffer <- gBuffer(segments_br050, width = 0.0195, byid = TRUE, capStyle = "FLAT", joinStyle = "BEVEL", mitreLimit = 0.01)
+plot(seg_buffer[4:6,], border = "orange")
+plot(seg_buffer, add = T)
+
+#transformar o arquivo SpatialLine em Linestring
+seg_sf <- st_as_sf(seg_buffer)
+seg_sf_crs <- seg_sf$geometry %>% 
+  st_as_sf(crs = 4326)
+
+# converter sistema de coordenadas da rodovia
+seg_road_utm22s <- sf::st_transform(seg_sf_crs, crs = 32722)
+
+#centroide de cada segmento da rodovia
+seg_centroide <- st_centroid(seg_road_utm22s)
+plot(seg_centroide)
+
+######## visualizando os pontos das fatalidades 
 dados_esp_geom <- dados_esp %>% 
   st_as_sf(coords = c("Long", "Lat"), crs = 4326)
 
-plot(segments_br050, col= rainbow(8), lwd=3) #visualizando a estrada segmentada
-plot(dados_esp_geom$geometry, add = TRUE) #visualizando as fatalidades na rodovia
+plot(seg_road_utm22s[10:20,], col= rainbow(8), lwd=3) #visualizando a estrada segmentada em segmentos especificos
+plot(fatalidades_utm22s$geometry, add = TRUE) #visualizando as fatalidades na rodovia
 
-#### visualizando o raster da paisagem entorno da rodovia
-raster <- raster::raster(here::here("Variaveis", "vegetacao", "mapbiomas_2013.tif"))
+####### contar o numero de fatalidades em cada trecho
+# converter sistema de coordenadas das fatalidades
+fatalidades_utm22s <- sf::st_transform(dados_esp_geom, crs = 32722)
+
+plot(seg_road_utm22s) #visualizando a rodovia 
+plot(fatalidades_utm22s$geometry, add = TRUE) #visualizando as fatalidades em cima da rodovia
+
+seg_fatal <- lengths(st_intersects(seg_road_utm22s, fatalidades_utm22s)) # contando numero de fatalidades em cada trecho
+
+######## visualizando o raster da paisagem entorno da rodovia
+raster <- raster::raster(here::here("Variaveis", "vegetacao", "raster_veg_road.tif"))
 plot(raster)
+nlayers(raster) # numero de camadas
+raster::freq(raster) # frequencia das celulas
 
-# numero de camadas
-nlayers(raster)
+# selecionar a classe floresta (1)
+raster_flo <- raster == 3
+plot(raster_flo)
 
-teste <- subset(raster, "mapbiomas_2013")
-plot(mapbio.reclass)
+# selecionar a classe agua (33)
+raster_agua <- raster == 33
+plot(raster_agua)
 
-raster_class <- raster::calc(x = raster, fun = function(x) ifelse(x == 1, "agua", NA))
+# vetorizando a classe agua em linha
+agua <- rasterToContour(raster_agua)
+plot(agua)
+agua_sf <- st_as_sf(agua)
 
-values.reclass <- cbind(c(1,3,4,5,9,10,11,12,13,14,15,18,19,20,21,22,23,24,25,27,29,30,31,32,33,36,39,40,41,46,47,48,49,26),
-                        c(NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2))
+# vetorizando a classe floresta em linha
+floresta <- rasterToContour(raster_flo)
+plot(floresta)
+floresta_sf <- st_as_sf(floresta)
 
-mapbio.reclass <- reclassify(raster, values.reclass)
+# converter sistema de coordenadas da agua
+agua_utm22s <- sf::st_transform(agua_sf, crs = 32722)
 
-image(raster)
+# converter sistema de coordenadas da floresta
+floresta_utm22s <- sf::st_transform(floresta_sf, crs = 32722)
 
+####### calculando a distancia do centroide de cada trecho da rodovia em relação a agua
+dist_agua <- seg_centroide %>% 
+  dplyr::mutate(dist_agua = sf::st_distance(seg_centroide, agua_utm22s))
 
-w <- raster %>% 
-  mutate(class_str = str_to_upper(class),
-         class_str = case_when(class_str == "3" ~ "FLO",
-                               class_str == "4" ~ "SAV",
-                               class_str == "5" ~ "MANG",
-                               class_str == "9" ~ "SILV",
-                               class_str == "11" ~ "CALAG",
-                               class_str == "12" ~ "CAMPO",
-                               class_str == "13" ~ "NONF",
-                               class_str == "14" ~ "AGROP",
-                               class_str == "15" ~ "PAS",
-                               class_str == "18" ~ "AGRIC",
-                               class_str == "20" ~ "CANA",
-                               class_str == "21" ~ "AGRPAS",
-                               class_str == "22" ~ "NOVEG",
-                               class_str == "23" ~ "DUNA",
-                               class_str == "24" ~ "URB",
-                               class_str == "25" ~ "NONVEG",
-                               class_str == "27" ~ "NOBS",
-                               class_str == "29" ~ "ROCHA",
-                               class_str == "30" ~ "MINER",
-                               class_str == "31" ~ "AQUIC",
-                               class_str == "32" ~ "APICUM",
-                               class_str == "33" ~ "AGUA",
-                               class_str == "36" ~ "LAVPER",
-                               class_str == "39" ~ "SOJA",
-                               class_str == "41" ~ "LAVTEMP",
-                               TRUE ~ class_str)
+####### calculando a distancia do centroide de cada trecho da rodovia em relação a agua
+dist_flo <- seg_centroide %>% 
+  dplyr::mutate(dist_flo = sf::st_distance(seg_centroide, floresta_utm22s))
 
 
 
 
 
-
-
-
-xx <- raster::raster(here::here("Variaveis", "vegetacao", "land_UA282_2018.tif"))
-plot(xx)
-
-dem_rc_crop_mask <- raster %>% 
-  raster::crop(rc_2020) %>% 
-  raster::mask(rc_2020)
-dem_rc_crop_mask
-
-
-
-
-
-
-
-
-x <- map(segments_br050, function(x){
-  x %>% 
-    st_distance(dados_esp_geom)
-  
-}
-  
+# exportar o vetor da rodovia segmentada na extensão esri shapefile
+st_write(obj = seg_road_utm22s, dsn = here::here("Variaveis", "rodovias", "seg_road_utm22s.shp"))
