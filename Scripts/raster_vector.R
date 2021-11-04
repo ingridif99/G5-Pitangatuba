@@ -6,13 +6,13 @@ library(sf)
 library(raster)
 
 ##### entrando com o shape da rodovia do google mymaps
-br050 <- st_read(here::here("Variaveis", "rodovias", "br050_mymaps.shp"), quiet = TRUE)
+br050 <- st_read(here::here("Variaveis", "rodovias", "br050_uber.shp"), quiet = TRUE)
 plot(br050$geometry) #visualizando a rodovia 050
 br050_ext <- sum(st_length(br050)) #extensao em metros da rodovia
 br050_geometry <- br050$geometry #selecionou apenas a coluna das coordenadas do df para ser um objeto class spatial lines
 br050_sp <- as_Spatial(br050_geometry) #transformando em objeto espacial SP
 
-source("SegmentSpatialLines_function.R") #puxando função para dividir br em segmentos
+source(here::here("Scripts", "SegmentSpatialLines_function.R")) #puxando função para dividir br em segmentos
 
 #segmentos de 5km
 segments_br050 <- SegmentSpatialLines(br050_sp, length = 0.045) # o comprimento na função é dado em metros, nossas coords estão em graus (1grau = 111km)
