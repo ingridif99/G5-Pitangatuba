@@ -57,7 +57,7 @@ seg_fatal <- lengths(st_intersects(seg_road_utm22s, fatalidades_utm22s)) # conta
 
 ######## visualizando o raster da paisagem entorno da rodovia
 raster <- raster::raster(here::here("Variaveis", "vegetacao", "raster_veg_road.tif"))
-plot(raster)
+plot(raster, col = viridis::viridis(10))
 nlayers(raster) # numero de camadas
 raster::freq(raster) # frequencia das celulas
 
@@ -103,7 +103,6 @@ min.dist_flo <- apply(dist_flo, 1, FUN = min)
 
 dados_glm <- as.data.frame(cbind(seg_fatal, min.dist_agua, min.dist_flo))
  
-
 
 
 # exportar o vetor da rodovia segmentada na extensão esri shapefile
