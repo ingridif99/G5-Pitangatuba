@@ -18,7 +18,7 @@ plot(modelo)
 ods <- modelo$deviance / modelo$df.residual; ods #underdispersion
 
 #usando os pacotes performance e see para checar a sobredispersao e residuos
-check_overdispersion(modelo)
+#check_overdispersion(modelo) #como foi binomial negativa nao ve sobredispersao
 check_model(modelo)
 
 # validacao do modelo pelos residuos
