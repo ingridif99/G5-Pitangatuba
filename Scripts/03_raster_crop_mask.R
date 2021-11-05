@@ -1,3 +1,11 @@
+#' ---
+#' title: cortando raster da rodovia para o trecho que tem atropelamentos
+#' author: G5 - Pitangatuba
+#' date: 03/11/2021
+#' ---
+
+
+
 #pacotes necessarios para rodar esse script
 library(here)
 library(tidyverse)

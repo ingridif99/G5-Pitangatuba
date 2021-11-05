@@ -1,6 +1,6 @@
 #' ---
 #' title: modelos glm para ver relação das variáveis com os atropelamentos na br050
-#' author:grupo pitangatuba
+#' author:G5 - Pitangatuba
 #' date: 04/11/2021
 #' ---
 library(MASS)
@@ -31,7 +31,11 @@ plot(dados_glm$seg_fatal ~ min.dist_flo,
 ods <- modelo$deviance / modelo$df.residual; ods #underdispersion
 
 #usando os pacotes performance e see para checar a sobredispersao e residuos
+<<<<<<< HEAD:Scripts/glm.R
 #check_overdispersion(modelo)
+=======
+#check_overdispersion(modelo) #como foi binomial negativa nao ve sobredispersao
+>>>>>>> 093c766f1ed00be850ff2fadda65a88a1e0d305a:Scripts/05_analise_glm.R
 check_model(modelo)
 
 # validacao do modelo pelos residuos

@@ -1,6 +1,6 @@
 #' ---
 #' title: selecionando os dados que vamos utilizar
-#' author:ingridi franceschi
+#' author:G5-Pitangatuba
 #' date: 01/11/2021
 #' ---
 

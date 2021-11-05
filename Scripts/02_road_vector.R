@@ -1,6 +1,6 @@
 #' ---
 #' title: selecionando a rodovia que vamos utilizar BR-050
-#' author:ingridi franceschi
+#' author: G5 - Pitangatuba
 #' date: 01/11/2021
 #' ---
 

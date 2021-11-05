@@ -1,3 +1,11 @@
+#' ---
+#' title: criando dados para glm (contagens de atropelamento por segmentoo, distancia para agua e floresta)
+#' author: G5 - Pitangatuba
+#' date: 04/11/2021
+#' ---
+
+
+
 #pacotes necessarios para rodar esse script
 library(here)
 library(tidyverse)
@@ -25,7 +33,9 @@ plot(segments_br050, col= rainbow(8), lwd=3) #visualizando a estrada segmentada
 
 #buffer de 2km em cada segmento
 seg_buffer <- gBuffer(segments_br050, width = 0.0195, byid = TRUE, capStyle = "FLAT", joinStyle = "BEVEL", mitreLimit = 0.01)
-plot(seg_buffer[4:6,], border = "orange")
+plot(seg_buffer, border = "orange")
+plot(seg_buffer[19:34,], border = "orange") #visualizar com zoom nesses segmentos
+
 
 #transformar o arquivo SpatialLine em Linestring
 seg_sf <- st_as_sf(seg_buffer)
@@ -38,13 +48,14 @@ seg_road_utm22s <- sf::st_transform(seg_sf_crs, crs = 32722)
 #centroide de cada segmento da rodovia
 seg_centroide <- st_centroid(seg_road_utm22s)
 plot(seg_centroide)
+plot(seg_centroide[19:52,])
 
 ######## visualizando os pontos das fatalidades 
 dados_esp_geom <- dados_esp %>% 
   st_as_sf(coords = c("Long", "Lat"), crs = 4326)
 
-plot(seg_road_utm22s[10:40,], col= rainbow(8), lwd=3) #visualizando a estrada segmentada em segmentos especificos
-plot(fatalidades_utm22s$geometry, add = TRUE) #visualizando as fatalidades na rodovia
+plot(seg_road_utm22s[19:32,], lwd=3) #visualizando a estrada segmentada em segmentos especificos
+plot(fatalidades_utm22s$geometry, add = TRUE, pch=20) #visualizando as fatalidades na rodovia
 
 ####### contar o numero de fatalidades em cada trecho
 # converter sistema de coordenadas das fatalidades
